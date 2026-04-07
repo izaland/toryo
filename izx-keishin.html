@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IZX Keishin Line — to.ryo途旅</title>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --font-body: 'Satoshi', 'Inter', sans-serif;
+  --bg: #0f0f0f;
+  --surface: #171716;
+  --surface2: #1f1e1c;
+  --border: #2a2927;
+  --text: #d4d3d0;
+  --text-muted: #6b6a68;
+  --text-faint: #3d3c3a;
+  --accent: #4a9eba;
+  --radius: 6px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+body { font-family: var(--font-body); background: var(--bg); color: var(--text); min-height: 100dvh; }
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; height: 52px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+}
+.logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.logo-text { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+.logo-text .dot { color: var(--accent); }
+.logo-kanji { font-size: 11px; color: var(--text-muted); opacity: 0.6; }
+.nav-links { display: flex; gap: 4px; }
+.nav-links a { font-size: 13px; color: var(--text-muted); text-decoration: none; padding: 5px 10px; border-radius: var(--radius); transition: color 150ms, background 150ms; }
+.nav-links a:hover { color: var(--text); background: var(--surface2); }
+.nav-links a.active { color: var(--text); background: var(--surface2); }
+.page { max-width: 1240px; margin: 0 auto; padding: 32px 24px 64px; }
+.breadcrumb { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
+.breadcrumb a { color: var(--text-muted); text-decoration: none; }
+.breadcrumb a:hover { color: var(--text); }
+.breadcrumb span { color: var(--text-faint); margin: 0 6px; }
+.line-header { margin-bottom: 28px; }
+.line-header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+.line-header .subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+.line-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); padding: 3px 10px 3px 6px; border-radius: 20px; font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; }
+.line-badge .code { background: #1B71CB; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+.legend { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 28px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.legend-group { display: flex; flex-direction: column; gap: 6px; }
+.legend-title { font-size: 10px; font-weight: 600; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; }
+.legend-items { display: flex; flex-wrap: wrap; gap: 10px; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.legend-line { width: 24px; height: 3px; border-radius: 2px; flex-shrink: 0; }
+.legend-sym { font-size: 12px; color: var(--text-muted); width: 14px; text-align: center; }
+.diagram-wrapper { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow-x: auto; padding: 0; }
+.diagram-scroll { min-width: 1100px; }
+svg.line-diagram { display: block; }
+.tooltip { position: fixed; display: none; background: #1a1918; border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: 12px; color: var(--text); pointer-events: none; z-index: 200; max-width: 220px; box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
+.tooltip .stn-name { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+.tooltip .stn-kanji { color: var(--text-muted); font-size: 11px; margin-bottom: 6px; }
+.tooltip .stn-code { font-size: 10px; color: var(--text-faint); font-family: monospace; }
+.tooltip .stn-km { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+.tooltip .svc-row { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+.tooltip .svc-chip { font-size: 10px; font-weight: 700; color: white; padding: 2px 7px; border-radius: 3px; }
+.station-table-wrap { margin-top: 32px; overflow-x: auto; }
+.station-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.station-table th { background: var(--surface2); color: var(--text-muted); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.station-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.station-table tr:hover td { background: var(--surface2); }
+.stn-name-cell { font-weight: 500; }
+.stn-name-cell.major { font-weight: 700; color: white; }
+.stn-kanji-cell { color: var(--text-muted); }
+.svc-dot { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; font-size: 9px; font-weight: 700; color: white; flex-shrink: 0; }
+.svc-row-cell { display: flex; gap: 3px; }
+.track-badge { font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.06em; }
+.track-coast { background: rgba(27,113,203,0.15); color: #6aabf0; border: 1px solid rgba(27,113,203,0.3); }
+.track-bypass { background: rgba(114,159,207,0.15); color: #96bfe0; border: 1px solid rgba(114,159,207,0.3); }
+.track-fast { background: rgba(146,106,202,0.15); color: #b89de0; border: 1px solid rgba(146,106,202,0.3); }
+.track-nankai { background: rgba(123,61,1,0.25); color: #c08040; border: 1px solid rgba(123,61,1,0.4); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-label="to.ryo logo">
+      <rect width="28" height="28" rx="6" fill="#1a1918"/>
+      <path d="M8 14 L14 8 L20 14" stroke="#4a9eba" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="14" cy="18" r="2.5" fill="#4a9eba"/>
+      <line x1="14" y1="14" x2="14" y2="16" stroke="#4a9eba" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span class="logo-text">to<span class="dot">.</span>ryo</span>
+    <span class="logo-kanji">途旅</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="izx.html" class="active">IZX Lines</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="breadcrumb">
+    <a href="index.html">to.ryo</a><span>›</span>
+    <a href="izx.html">IZX Railway</a><span>›</span>
+    Keishin Line
+  </div>
+
+  <div class="line-header">
+    <div class="line-badge"><span class="code">K</span>IZX Keishin Line · IZX京深線</div>
+    <h1>Keishin Line <span style="color:var(--text-muted);font-weight:400">京深線</span></h1>
+    <div class="subtitle">Sainðaul Central → Warohan → Daishin &nbsp;·&nbsp; 569.6 km (Keishin) + Nankai through service</div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-group">
+      <div class="legend-title">Track segments</div>
+      <div class="legend-items">
+        <div class="legend-item"><div class="legend-line" style="background:#1B71CB"></div>Coastal main line</div>
+        <div class="legend-item"><div class="legend-line" style="background:#729FCF"></div>Inland bypass</div>
+        <div class="legend-item"><div class="legend-line" style="background:#926ACA"></div>Sakamuso fast line</div>
+        <div class="legend-item"><div class="legend-line" style="background:#7B3D01;opacity:0.8"></div>Nankai through service</div>
+      </div>
+    </div>
+    <div class="legend-group">
+      <div class="legend-title">Services</div>
+      <div class="legend-items">
+        <div class="legend-item"><div class="legend-dot" style="background:#002A91"></div>A</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#1B71CB"></div>B</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#729FCF"></div>C</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#926ACA"></div>D</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#BC68CC"></div>E</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#7B3D01"></div>F</div>
+      </div>
+    </div>
+    <div class="legend-group">
+      <div class="legend-title">Stop symbols</div>
+      <div class="legend-items">
+        <div class="legend-item"><span class="legend-sym">●</span>All stops</div>
+        <div class="legend-item"><span class="legend-sym">|</span>Pass through</div>
+        <div class="legend-item"><span class="legend-sym">▲</span>Seasonal / limited</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="diagram-wrapper">
+    <div class="diagram-scroll">
+
+<svg class="line-diagram" width="1140" height="370" viewBox="0 0 1140 370" xmlns="http://www.w3.org/2000/svg">
+<rect width="1140" height="370" fill="#171716"/>
+
+<!-- Grid verticals at key nodes -->
+<line x1="60" y1="20" x2="60" y2="350" stroke="#2a2927" stroke-width="1" stroke-dasharray="3,6"/>
+<line x1="315.7" y1="20" x2="315.7" y2="350" stroke="#2a2927" stroke-width="1" stroke-dasharray="3,6"/>
+<line x1="415.5" y1="20" x2="415.5" y2="350" stroke="#2a2927" stroke-width="1" stroke-dasharray="3,6"/>
+<line x1="886.9" y1="20" x2="886.9" y2="350" stroke="#2a2927" stroke-width="1" stroke-dasharray="3,6"/>
+<line x1="1100" y1="20" x2="1100" y2="350" stroke="#2a2927" stroke-width="1" stroke-dasharray="3,6"/>
+
+<!-- ═══ TRACK LINES ═══ -->
+
+<!-- Coastal main: K01→K17 -->
+<line x1="60" y1="80" x2="886.9" y2="80" stroke="#1B71CB" stroke-width="3.5" stroke-linecap="round"/>
+
+<!-- Nankai through: K17→N4 (dashed, brown) -->
+<line x1="886.9" y1="80" x2="1100" y2="80" stroke="#7B3D01" stroke-width="3" stroke-linecap="round" stroke-dasharray="9,4"/>
+
+<!-- Inland bypass: diverges K03→curves down→K31→K32→K33→curves up→K08 -->
+<path d="M 92.6,80 C 110,155 115,155 135,155" stroke="#729FCF" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+<line x1="135" y1="155" x2="270" y2="155" stroke="#729FCF" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M 270,155 C 295,155 300,80 315.7,80" stroke="#729FCF" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+<!-- Sakamuso fast: K101 left→across→curves up→K10 -->
+<line x1="60" y1="230" x2="390" y2="230" stroke="#926ACA" stroke-width="3" stroke-linecap="round"/>
+<path d="M 390,230 C 408,230 410,80 415.5,80" stroke="#926ACA" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+<!-- Sakamuso terminal bar -->
+<rect x="58" y="216" width="4" height="28" rx="2" fill="#926ACA"/>
+
+<!-- Merge ring indicators -->
+<circle cx="315.7" cy="80" r="9" fill="none" stroke="#729FCF" stroke-width="1.5" stroke-dasharray="3,2" opacity="0.7"/>
+<circle cx="415.5" cy="80" r="9" fill="none" stroke="#926ACA" stroke-width="1.5" stroke-dasharray="3,2" opacity="0.7"/>
+
+<!-- ═══ STATION DOTS — main track ═══ -->
+<!-- K01 Sainðaul Central MAJOR -->
+<g class="station-node" style="cursor:pointer" onmouseenter="showTip(event,'K01','Sainðaul Central','作安崎中央','0.0 km',['A','B','C'])" onmouseleave="hideTip()">
+  <circle cx="60" cy="80" r="11" fill="transparent"/>
+  <circle cx="60" cy="80" r="7" fill="#1B71CB" stroke="#0f0f0f" stroke-width="2.5"/>
+</g>
+<text x="60" y="62" text-anchor="middle" fill="#d4d3d0" font-size="9.5" font-weight="700" font-family="Satoshi,sans-serif">Sainðaul</text>
+<text x="60" y="72" text-anchor="middle" fill="#d4d3d0" font-size="9.5" font-weight="700" font-family="Satoshi,sans-serif">Central</text>
+
+<!-- K02 Niji-Sainðaul -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K02','Niji-Sainðaul','西作安崎','11.4 km',['A','B','C'])" onmouseleave="hideTip()">
+  <circle cx="77" cy="80" r="9" fill="transparent"/>
+  <circle cx="77" cy="80" r="5" fill="#171716" stroke="#1B71CB" stroke-width="2"/>
+</g>
+<text x="77" y="97" text-anchor="middle" fill="#6b6a68" font-size="8.5" font-family="Satoshi,sans-serif">Niji-Sainðaul</text>
+
+<!-- K03 Asunahama Airport -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K03','Asunahama Airport','天島國際空港','35.4 km',['A','B','C'])" onmouseleave="hideTip()">
+  <circle cx="92.6" cy="80" r="9" fill="transparent"/>
+  <circle cx="92.6" cy="80" r="5" fill="#171716" stroke="#1B71CB" stroke-width="2"/>
+</g>
+<text x="92.6" y="66" text-anchor="middle" fill="#6b6a68" font-size="8.5" font-family="Satoshi,sans-serif">Airport</text>
+
+<!-- K04 Hashimakori-Juwon -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K04','Hashimakori-Juwon','示万飯中央','84.9 km',['B','C'])" onmouseleave="hideTip()">
+  <circle cx="168" cy="80" r="9" fill="transparent"/>
+  <circle cx="168" cy="80" r="5" fill="#171716" stroke="#1B71CB" stroke-width="2"/>
+</g>
+<text x="168" y="95" text-anchor="middle" fill="#6b6a68" font-size="8" font-family="Satoshi,sans-serif">Hashimakori</text>
+
+<!-- K05 Wodoriha IR -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K05','Wodoriha IR','渉高IR','101.8 km',['B','C'])" onmouseleave="hideTip()">
+  <circle cx="195" cy="80" r="9" fill="transparent"/>
+  <circle cx="195" cy="80" r="5" fill="#171716" stroke="#1B71CB" stroke-width="2"/>
+</g>
+<text x="195" y="67" text-anchor="middle" fill="#6b6a68" font-size="8.5" font-family="Satoshi,sans-serif">Wodoriha IR</text>
+
+<!-- K06 Shin-Eriraul -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K06','Shin-Eriraul','新繰羅崎','123.0 km',['B','C'])" onmouseleave="hideTip()">
+  <circle cx="224" cy="80" r="9" fill="transparent"/>
+  <circle cx="224" cy="80" r="5" fill="#171716" stroke="#1B71CB" stroke-width="2"/>
+</g>
+<text x="224" y="95" text-anchor="middle" fill="#6b6a68" font-size="8.5" font-family="Satoshi,sans-serif">Shin-Eriraul</text>
+
+<!-- K07 Nappawa -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K07','Nappawa','那覇輪','144.7 km',['B','C'])" onmouseleave="hideTip()">
+  <circle cx="252" cy="80" r="9" fill="transparent"/>
+  <circle cx="252" cy="80" r="5" fill="#171716" stroke="#1B71CB" stroke-width="2"/>
+</g>
+<text x="252" y="67" text-anchor="middle" fill="#6b6a68" font-size="8.5" font-family="Satoshi,sans-serif">Nappawa</text>
+
+<!-- K08 Otsumi-Komishinan MAJOR (merge 1) -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K08','Otsumi-Komishinan','南古邊南','185.4 km',['A','B','C'])" onmouseleave="hideTip()">
+  <circle cx="315.7" cy="80" r="11" fill="transparent"/>
+  <circle cx="315.7" cy="80" r="7" fill="#1B71CB" stroke="#0f0f0f" stroke-width="2.5"/>
+</g>
+<text x="315.7" y="62" text-anchor="middle" fill="#d4d3d0" font-size="9" font-weight="700" font-family="Satoshi,sans-serif">Otsumi-</text>
+<text x="315.7" y="72" text-anchor="middle" fill="#d4d3d0" font-size="9" font-weight="700" font-family="Satoshi,sans-serif">Komishinan</text>
+<text x="315.7" y="103" text-anchor="middle" fill="#729FCF" font-size="8" font-family="Satoshi,sans-serif" opacity="0.7">merge 1</text>
+
+<!-- K09 Kamahoraya -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K09','Kamahoraya','寺稲野','198.0 km',['C'])" onmouseleave="hideTip()">
+  <circle cx="340" cy="80" r="9" fill="transparent"/>
+  <circle cx="340" cy="80" r="5" fill="#171716" stroke="#1B71CB" stroke-width="2"/>
+</g>
+<text x="340" y="95" text-anchor="middle" fill="#6b6a68" font-size="8.5" font-family="Satoshi,sans-serif">Kamahoraya</text>
+
+<!-- K10 Shin-Kichatsura Teba MAJOR (merge 2) -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K10','Shin-Kichatsura Teba','新龜茶夕馬','252.5 km',['A','B','C','D','E'])" onmouseleave="hideTip()">
+  <circle cx="415.5" cy="80" r="11" fill="transparent"/>
+  <circle cx="415.5" cy="80" r="7" fill="#1B71CB" stroke="#0f0f0f" stroke-width="2.5"/>
+</g>
+<text x="415.5" y="62" text-anchor="middle" fill="#d4d3d0" font-size="8.5" font-weight="700" font-family="Satoshi,sans-serif">Shin-Kichatsura</text>
+<text x="415.5" y="72" text-anchor="middle" fill="#d4d3d0" font-size="8.5" font-weight="700" font-family="Satoshi,sans-serif">Teba</text>
+<text x="415.5" y="103" text-anchor="middle" fill="#926ACA" font-size="8" font-family="Satoshi,sans-serif" opacity="0.7">merge 2</text>
+
+<!-- K101s Shin-Kashioka -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K101s','Shin-Kashioka','新笂付','285.1 km',['A','B','D','E'])" onmouseleave="hideTip()">
+  <circle cx="455" cy="80" r="9" fill="transparent"/>
+  <circle cx="455" cy="80" r="5" fill="#171716" stroke="#1B71CB" stroke-width="2"/>
+</g>
+<text x="455" y="95" text-anchor="middle" fill="#6b6a68" font-size="8.5" font-family="Satoshi,sans-serif">Shin-Kashioka</text>
+
+<!-- K11 Nugamochi -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K11','Nugamochi','陥桃','296.6 km',['A','B','C','D','E'])" onmouseleave="hideTip()">
+  <circle cx="472" cy="80" r="9" fill="transparent"/>
+  <circle cx="472" cy="80" r="5" fill="#171716" stroke="#1B71CB" stroke-width="2"/>
+</g>
+<text x="472" y="67" text-anchor="middle" fill="#6b6a68" font-size="8.5" font-family="Satoshi,sans-serif">Nugamochi</text>
+
+<!-- K12 Panaireki MAJOR -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K12','Panaireki','若浦','345.0 km',['A','B','C','D','E'])" onmouseleave="hideTip()">
+  <circle cx="541" cy="80" r="11" fill="transparent"/>
+  <circle cx="541" cy="80" r="7" fill="#1B71CB" stroke="#0f0f0f" stroke-width="2.5"/>
+</g>
+<text x="541" y="62" text-anchor="middle" fill="#d4d3d0" font-size="10" font-weight="700" font-family="Satoshi,sans-serif">Panaireki</text>
+
+<!-- K13 Hyōmonan Resort -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K13','Hyōmonan Resort','裱茂南遊園','386.3 km',['D','E'])" onmouseleave="hideTip()">
+  <circle cx="604" cy="80" r="9" fill="transparent"/>
+  <circle cx="604" cy="80" r="5" fill="#171716" stroke="#1B71CB" stroke-width="2"/>
+</g>
+<text x="604" y="95" text-anchor="middle" fill="#6b6a68" font-size="8" font-family="Satoshi,sans-serif">Hyōmonan</text>
+
+<!-- K14 Shin-Imihatsorul -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K14','Shin-Imihatsorul','新立鰹埼','427.1 km',['B','D','E'])" onmouseleave="hideTip()">
+  <circle cx="666" cy="80" r="9" fill="transparent"/>
+  <circle cx="666" cy="80" r="5" fill="#171716" stroke="#1B71CB" stroke-width="2"/>
+</g>
+<text x="666" y="67" text-anchor="middle" fill="#6b6a68" font-size="8" font-family="Satoshi,sans-serif">Shin-Imihatsorul</text>
+
+<!-- K144 Tsirina Wentsān -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K144','Tsirina Wentsān','障内銀尚','451.7 km',['B','D','E'])" onmouseleave="hideTip()">
+  <circle cx="702" cy="80" r="9" fill="transparent"/>
+  <circle cx="702" cy="80" r="5" fill="#171716" stroke="#1B71CB" stroke-width="2"/>
+</g>
+<text x="702" y="95" text-anchor="middle" fill="#6b6a68" font-size="8" font-family="Satoshi,sans-serif">Tsirina Wentsān</text>
+
+<!-- K15 Naeba -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K15','Naeba','内波','489.8 km',['B','D','E'])" onmouseleave="hideTip()">
+  <circle cx="757" cy="80" r="9" fill="transparent"/>
+  <circle cx="757" cy="80" r="5" fill="#171716" stroke="#1B71CB" stroke-width="2"/>
+</g>
+<text x="757" y="67" text-anchor="middle" fill="#6b6a68" font-size="8.5" font-family="Satoshi,sans-serif">Naeba</text>
+
+<!-- K16 Eyenniyul Juwon -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K16','Eyenniyul Juwon','粏五崎中央','523.6 km',['B','D','E'])" onmouseleave="hideTip()">
+  <circle cx="806" cy="80" r="9" fill="transparent"/>
+  <circle cx="806" cy="80" r="5" fill="#171716" stroke="#1B71CB" stroke-width="2"/>
+</g>
+<text x="806" y="95" text-anchor="middle" fill="#6b6a68" font-size="8" font-family="Satoshi,sans-serif">Eyenniyul</text>
+
+<!-- K116 Yaseura -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K116','Yaseura','足生田','550.9 km',['B','D','E'])" onmouseleave="hideTip()">
+  <circle cx="845" cy="80" r="9" fill="transparent"/>
+  <circle cx="845" cy="80" r="5" fill="#171716" stroke="#1B71CB" stroke-width="2"/>
+</g>
+<text x="845" y="67" text-anchor="middle" fill="#6b6a68" font-size="8.5" font-family="Satoshi,sans-serif">Yaseura</text>
+
+<!-- K17 Warohan MAJOR -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K17','Warohan','深彎','569.6 km',['A','B','D','E','F'])" onmouseleave="hideTip()">
+  <circle cx="886.9" cy="80" r="11" fill="transparent"/>
+  <circle cx="886.9" cy="80" r="7" fill="#7B3D01" stroke="#0f0f0f" stroke-width="2.5"/>
+</g>
+<text x="886.9" y="62" text-anchor="middle" fill="#d4d3d0" font-size="10" font-weight="700" font-family="Satoshi,sans-serif">Warohan</text>
+
+<!-- Nankai stations -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'N1','Naraki-Attawi','','~582 km',['B','E','F'])" onmouseleave="hideTip()">
+  <circle cx="920" cy="80" r="9" fill="transparent"/>
+  <circle cx="920" cy="80" r="5" fill="#171716" stroke="#7B3D01" stroke-width="2"/>
+</g>
+<text x="920" y="95" text-anchor="middle" fill="#6b6a68" font-size="8" font-family="Satoshi,sans-serif">Naraki-Attawi</text>
+
+<g style="cursor:pointer" onmouseenter="showTip(event,'N2','Satsokoibo','青袋','~598 km',['B','E','F'])" onmouseleave="hideTip()">
+  <circle cx="948" cy="80" r="9" fill="transparent"/>
+  <circle cx="948" cy="80" r="5" fill="#171716" stroke="#7B3D01" stroke-width="2"/>
+</g>
+<text x="948" y="67" text-anchor="middle" fill="#6b6a68" font-size="8" font-family="Satoshi,sans-serif">Satsokoibo</text>
+
+<g style="cursor:pointer" onmouseenter="showTip(event,'N3','Shin-Nuskajui','新廣壁','~620 km',['B','E','F'])" onmouseleave="hideTip()">
+  <circle cx="984" cy="80" r="9" fill="transparent"/>
+  <circle cx="984" cy="80" r="5" fill="#171716" stroke="#7B3D01" stroke-width="2"/>
+</g>
+<text x="984" y="95" text-anchor="middle" fill="#6b6a68" font-size="8" font-family="Satoshi,sans-serif">Shin-Nuskajui</text>
+
+<!-- N4 Daishin MAJOR -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'N4','Daishin','大進','~686 km',['A','B','D','E','F'])" onmouseleave="hideTip()">
+  <circle cx="1100" cy="80" r="11" fill="transparent"/>
+  <circle cx="1100" cy="80" r="7" fill="#7B3D01" stroke="#0f0f0f" stroke-width="2.5"/>
+</g>
+<text x="1100" y="62" text-anchor="middle" fill="#d4d3d0" font-size="10" font-weight="700" font-family="Satoshi,sans-serif">Daishin</text>
+
+<!-- ═══ BYPASS STATIONS ═══ -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K31','Pyanuza','','bypass ~50 km',['A','C'])" onmouseleave="hideTip()">
+  <circle cx="145" cy="155" r="9" fill="transparent"/>
+  <circle cx="145" cy="155" r="5" fill="#171716" stroke="#729FCF" stroke-width="2"/>
+</g>
+<text x="145" y="170" text-anchor="middle" fill="#6b6a68" font-size="8.5" font-family="Satoshi,sans-serif">Pyanuza</text>
+
+<g style="cursor:pointer" onmouseenter="showTip(event,'K32','Nagayamatsu','','bypass ~70 km',['C'])" onmouseleave="hideTip()">
+  <circle cx="200" cy="155" r="9" fill="transparent"/>
+  <circle cx="200" cy="155" r="5" fill="#171716" stroke="#729FCF" stroke-width="2"/>
+</g>
+<text x="200" y="142" text-anchor="middle" fill="#6b6a68" font-size="8.5" font-family="Satoshi,sans-serif">Nagayamatsu</text>
+
+<g style="cursor:pointer" onmouseenter="showTip(event,'K33','Keishunneul','','bypass ~90 km',['C'])" onmouseleave="hideTip()">
+  <circle cx="255" cy="155" r="9" fill="transparent"/>
+  <circle cx="255" cy="155" r="5" fill="#171716" stroke="#729FCF" stroke-width="2"/>
+</g>
+<text x="255" y="170" text-anchor="middle" fill="#6b6a68" font-size="8.5" font-family="Satoshi,sans-serif">Keishunneul</text>
+
+<!-- ═══ SAKAMUSO FAST STATIONS ═══ -->
+<!-- K101 Sakamuso MAJOR -->
+<g style="cursor:pointer" onmouseenter="showTip(event,'K101','Sakamuso','沛坤','0 km (Sakamuso)',['D','E'])" onmouseleave="hideTip()">
+  <circle cx="60" cy="230" r="11" fill="transparent"/>
+  <circle cx="60" cy="230" r="7" fill="#926ACA" stroke="#0f0f0f" stroke-width="2.5"/>
+</g>
+<text x="60" y="250" text-anchor="middle" fill="#d4d3d0" font-size="9.5" font-weight="700" font-family="Satoshi,sans-serif">Sakamuso</text>
+
+<g style="cursor:pointer" onmouseenter="showTip(event,'K102','Showanul','書瓦崎','~30 km',['E'])" onmouseleave="hideTip()">
+  <circle cx="108" cy="230" r="9" fill="transparent"/>
+  <circle cx="108" cy="230" r="5" fill="#171716" stroke="#926ACA" stroke-width="2"/>
+</g>
+<text x="108" y="216" text-anchor="middle" fill="#6b6a68" font-size="8.5" font-family="Satoshi,sans-serif">Showanul</text>
+
+<g style="cursor:pointer" onmouseenter="showTip(event,'K120','Panatsawa','','~60 km',['E'])" onmouseleave="hideTip()">
+  <circle cx="156" cy="230" r="9" fill="transparent"/>
+  <circle cx="156" cy="230" r="5" fill="#171716" stroke="#926ACA" stroke-width="2"/>
+</g>
+<text x="156" y="246" text-anchor="middle" fill="#6b6a68" font-size="8.5" font-family="Satoshi,sans-serif">Panatsawa</text>
+
+<g style="cursor:pointer" onmouseenter="showTip(event,'K103','Katayoshi Juwon','泉峰中央','~100 km',['D','E'])" onmouseleave="hideTip()">
+  <circle cx="218" cy="230" r="9" fill="transparent"/>
+  <circle cx="218" cy="230" r="5" fill="#171716" stroke="#926ACA" stroke-width="2"/>
+</g>
+<text x="218" y="216" text-anchor="middle" fill="#6b6a68" font-size="8" font-family="Satoshi,sans-serif">Katayoshi</text>
+
+<g style="cursor:pointer" onmouseenter="showTip(event,'K104','Illashiya','狐棲','~140 km',['D','E'])" onmouseleave="hideTip()">
+  <circle cx="278" cy="230" r="9" fill="transparent"/>
+  <circle cx="278" cy="230" r="5" fill="#171716" stroke="#926ACA" stroke-width="2"/>
+</g>
+<text x="278" y="246" text-anchor="middle" fill="#6b6a68" font-size="8.5" font-family="Satoshi,sans-serif">Illashiya</text>
+
+<g style="cursor:pointer" onmouseenter="showTip(event,'K105','Chōpatsu','','~170 km',['E'])" onmouseleave="hideTip()">
+  <circle cx="316" cy="230" r="9" fill="transparent"/>
+  <circle cx="316" cy="230" r="5" fill="#171716" stroke="#926ACA" stroke-width="2"/>
+</g>
+<text x="316" y="216" text-anchor="middle" fill="#6b6a68" font-size="8.5" font-family="Satoshi,sans-serif">Chōpatsu</text>
+
+<g style="cursor:pointer" onmouseenter="showTip(event,'K106','Kohtosōre','','~205 km',['E'])" onmouseleave="hideTip()">
+  <circle cx="360" cy="230" r="9" fill="transparent"/>
+  <circle cx="360" cy="230" r="5" fill="#171716" stroke="#926ACA" stroke-width="2"/>
+</g>
+<text x="360" y="246" text-anchor="middle" fill="#6b6a68" font-size="8.5" font-family="Satoshi,sans-serif">Kohtosōre</text>
+
+<g style="cursor:pointer" onmouseenter="showTip(event,'K160','Ikahoro Kōwen','','~235 km',['E'])" onmouseleave="hideTip()">
+  <circle cx="390" cy="230" r="9" fill="transparent"/>
+  <circle cx="390" cy="230" r="5" fill="#171716" stroke="#926ACA" stroke-width="2"/>
+</g>
+<text x="390" y="216" text-anchor="middle" fill="#6b6a68" font-size="8" font-family="Satoshi,sans-serif">Ikahoro Kōwen</text>
+
+<!-- Track labels -->
+<text x="32" y="84" text-anchor="middle" fill="#1B71CB" font-size="8" font-weight="700" font-family="Satoshi,sans-serif" transform="rotate(-90,32,84)">COAST</text>
+<text x="32" y="159" text-anchor="middle" fill="#729FCF" font-size="8" font-weight="700" font-family="Satoshi,sans-serif" transform="rotate(-90,32,159)">BYPASS</text>
+<text x="32" y="234" text-anchor="middle" fill="#926ACA" font-size="8" font-weight="700" font-family="Satoshi,sans-serif" transform="rotate(-90,32,234)">FAST</text>
+
+<!-- Nankai label -->
+<text x="993" y="68" text-anchor="middle" fill="#7B3D01" font-size="8" font-family="Satoshi,sans-serif" opacity="0.9">via Nankai Line →</text>
+</svg>
+
+    </div>
+  </div>
+
+  <div class="station-table-wrap">
+    <table class="station-table">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Station</th>
+          <th>Izaki</th>
+          <th>km from SCL</th>
+          <th>Between</th>
+          <th>Segment</th>
+          <th style="text-align:center">Services</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K01</td><td class="stn-name-cell major">Sainðaul Central</td><td class="stn-kanji-cell">作安崎中央</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">0.0</td><td style="color:var(--text-muted)">—</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#002A91">A</span><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#729FCF">C</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K02</td><td class="stn-name-cell">Niji-Sainðaul</td><td class="stn-kanji-cell">西作安崎</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">11.4</td><td style="color:var(--text-muted)">11.4</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#002A91">A</span><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#729FCF">C</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K03</td><td class="stn-name-cell">Asunahama Airport</td><td class="stn-kanji-cell">天島國際空港</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">35.4</td><td style="color:var(--text-muted)">24.0</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#002A91">A</span><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#729FCF">C</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K31</td><td class="stn-name-cell">Pyanuza</td><td class="stn-kanji-cell"></td><td style="color:var(--text-muted)">—</td><td style="color:var(--text-muted)">—</td><td><span class="track-badge track-bypass">Bypass</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#002A91">A</span><span class="svc-dot" style="background:#729FCF">C</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K32</td><td class="stn-name-cell">Nagayamatsu</td><td class="stn-kanji-cell"></td><td style="color:var(--text-muted)">—</td><td style="color:var(--text-muted)">—</td><td><span class="track-badge track-bypass">Bypass</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#729FCF">C</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K33</td><td class="stn-name-cell">Keishunneul</td><td class="stn-kanji-cell"></td><td style="color:var(--text-muted)">—</td><td style="color:var(--text-muted)">—</td><td><span class="track-badge track-bypass">Bypass</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#729FCF">C</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K04</td><td class="stn-name-cell">Hashimakori-Juwon</td><td class="stn-kanji-cell">示万飯中央</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">84.9</td><td style="color:var(--text-muted)">49.5</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#729FCF">C</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K05</td><td class="stn-name-cell">Wodoriha IR</td><td class="stn-kanji-cell">渉高IR</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">101.8</td><td style="color:var(--text-muted)">16.9</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#729FCF">C</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K06</td><td class="stn-name-cell">Shin-Eriraul</td><td class="stn-kanji-cell">新繰羅崎</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">123.0</td><td style="color:var(--text-muted)">21.2</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#729FCF">C</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K07</td><td class="stn-name-cell">Nappawa</td><td class="stn-kanji-cell">那覇輪</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">144.7</td><td style="color:var(--text-muted)">21.7</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#729FCF">C</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K08</td><td class="stn-name-cell major">Otsumi-Komishinan</td><td class="stn-kanji-cell">南古邊南</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">185.4</td><td style="color:var(--text-muted)">40.7</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#002A91">A</span><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#729FCF">C</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K09</td><td class="stn-name-cell">Kamahoraya</td><td class="stn-kanji-cell">寺稲野</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">198.0</td><td style="color:var(--text-muted)">12.7</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#729FCF">C</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K101</td><td class="stn-name-cell major">Sakamuso</td><td class="stn-kanji-cell">沛坤</td><td style="color:var(--text-muted)">—</td><td style="color:var(--text-muted)">—</td><td><span class="track-badge track-fast">Sakamuso</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#926ACA">D</span><span class="svc-dot" style="background:#BC68CC">E</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K102</td><td class="stn-name-cell">Showanul</td><td class="stn-kanji-cell">書瓦崎</td><td style="color:var(--text-muted)">—</td><td style="color:var(--text-muted)">—</td><td><span class="track-badge track-fast">Sakamuso</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#BC68CC">E</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K120</td><td class="stn-name-cell">Panatsawa</td><td class="stn-kanji-cell"></td><td style="color:var(--text-muted)">—</td><td style="color:var(--text-muted)">—</td><td><span class="track-badge track-fast">Sakamuso</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#BC68CC">E</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K103</td><td class="stn-name-cell">Katayoshi Juwon</td><td class="stn-kanji-cell">泉峰中央</td><td style="color:var(--text-muted)">—</td><td style="color:var(--text-muted)">—</td><td><span class="track-badge track-fast">Sakamuso</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#926ACA">D</span><span class="svc-dot" style="background:#BC68CC">E</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K104</td><td class="stn-name-cell">Illashiya</td><td class="stn-kanji-cell">狐棲</td><td style="color:var(--text-muted)">—</td><td style="color:var(--text-muted)">—</td><td><span class="track-badge track-fast">Sakamuso</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#926ACA">D</span><span class="svc-dot" style="background:#BC68CC">E</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K105</td><td class="stn-name-cell">Chōpatsu</td><td class="stn-kanji-cell"></td><td style="color:var(--text-muted)">—</td><td style="color:var(--text-muted)">—</td><td><span class="track-badge track-fast">Sakamuso</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#BC68CC">E</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K106</td><td class="stn-name-cell">Kohtosōre</td><td class="stn-kanji-cell"></td><td style="color:var(--text-muted)">—</td><td style="color:var(--text-muted)">—</td><td><span class="track-badge track-fast">Sakamuso</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#BC68CC">E</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K160</td><td class="stn-name-cell">Ikahoro Kōwen</td><td class="stn-kanji-cell"></td><td style="color:var(--text-muted)">—</td><td style="color:var(--text-muted)">—</td><td><span class="track-badge track-fast">Sakamuso</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#BC68CC">E</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K10</td><td class="stn-name-cell major">Shin-Kichatsura Teba</td><td class="stn-kanji-cell">新龜茶夕馬</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">252.5</td><td style="color:var(--text-muted)">54.5</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#002A91">A</span><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#729FCF">C</span><span class="svc-dot" style="background:#926ACA">D</span><span class="svc-dot" style="background:#BC68CC">E</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K101s</td><td class="stn-name-cell">Shin-Kashioka</td><td class="stn-kanji-cell">新笂付</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">285.1</td><td style="color:var(--text-muted)">32.6</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#002A91">A</span><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#926ACA">D</span><span class="svc-dot" style="background:#BC68CC">E</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K11</td><td class="stn-name-cell">Nugamochi</td><td class="stn-kanji-cell">陥桃</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">296.6</td><td style="color:var(--text-muted)">11.5</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#002A91">A</span><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#729FCF">C</span><span class="svc-dot" style="background:#926ACA">D</span><span class="svc-dot" style="background:#BC68CC">E</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K12</td><td class="stn-name-cell major">Panaireki</td><td class="stn-kanji-cell">若浦</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">345.0</td><td style="color:var(--text-muted)">48.4</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#002A91">A</span><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#729FCF">C</span><span class="svc-dot" style="background:#926ACA">D</span><span class="svc-dot" style="background:#BC68CC">E</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K13</td><td class="stn-name-cell">Hyōmonan Resort</td><td class="stn-kanji-cell">裱茂南遊園</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">386.3</td><td style="color:var(--text-muted)">41.3</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#926ACA">D</span><span class="svc-dot" style="background:#BC68CC">E</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K14</td><td class="stn-name-cell">Shin-Imihatsorul</td><td class="stn-kanji-cell">新立鰹埼</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">427.1</td><td style="color:var(--text-muted)">40.9</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#926ACA">D</span><span class="svc-dot" style="background:#BC68CC">E</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K144</td><td class="stn-name-cell">Tsirina Wentsān</td><td class="stn-kanji-cell">障内銀尚</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">451.7</td><td style="color:var(--text-muted)">24.6</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#926ACA">D</span><span class="svc-dot" style="background:#BC68CC">E</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K15</td><td class="stn-name-cell">Naeba</td><td class="stn-kanji-cell">内波</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">489.8</td><td style="color:var(--text-muted)">38.1</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#926ACA">D</span><span class="svc-dot" style="background:#BC68CC">E</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K16</td><td class="stn-name-cell">Eyenniyul Juwon</td><td class="stn-kanji-cell">粏五崎中央</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">523.6</td><td style="color:var(--text-muted)">33.8</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#926ACA">D</span><span class="svc-dot" style="background:#BC68CC">E</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K116</td><td class="stn-name-cell">Yaseura</td><td class="stn-kanji-cell">足生田</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">550.9</td><td style="color:var(--text-muted)">27.3</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#926ACA">D</span><span class="svc-dot" style="background:#BC68CC">E</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">K17</td><td class="stn-name-cell major">Warohan</td><td class="stn-kanji-cell">深彎</td><td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">569.6</td><td style="color:var(--text-muted)">18.7</td><td><span class="track-badge track-coast">Coastal</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#002A91">A</span><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#926ACA">D</span><span class="svc-dot" style="background:#BC68CC">E</span><span class="svc-dot" style="background:#7B3D01">F</span></div></td></tr>
+        <tr><td colspan="7" style="padding:6px 10px;color:var(--text-faint);font-size:11px;font-style:italic">Trains continue onto the IZX Nankai Line through to Daishin</td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">N1</td><td class="stn-name-cell">Naraki-Attawi</td><td class="stn-kanji-cell"></td><td style="color:var(--text-muted)">—</td><td style="color:var(--text-muted)">—</td><td><span class="track-badge track-nankai">Nankai</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#BC68CC">E</span><span class="svc-dot" style="background:#7B3D01">F</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">N2</td><td class="stn-name-cell">Satsokoibo</td><td class="stn-kanji-cell">青袋</td><td style="color:var(--text-muted)">—</td><td style="color:var(--text-muted)">—</td><td><span class="track-badge track-nankai">Nankai</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#BC68CC">E</span><span class="svc-dot" style="background:#7B3D01">F</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">N3</td><td class="stn-name-cell">Shin-Nuskajui</td><td class="stn-kanji-cell">新廣壁</td><td style="color:var(--text-muted)">—</td><td style="color:var(--text-muted)">—</td><td><span class="track-badge track-nankai">Nankai</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#BC68CC">E</span><span class="svc-dot" style="background:#7B3D01">F</span></div></td></tr>
+        <tr><td style="color:var(--text-faint);font-family:monospace;font-size:11px">N4</td><td class="stn-name-cell major">Daishin</td><td class="stn-kanji-cell">大進</td><td style="color:var(--text-muted)">—</td><td style="color:var(--text-muted)">—</td><td><span class="track-badge track-nankai">Nankai</span></td><td><div class="svc-row-cell"><span class="svc-dot" style="background:#002A91">A</span><span class="svc-dot" style="background:#1B71CB">B</span><span class="svc-dot" style="background:#926ACA">D</span><span class="svc-dot" style="background:#BC68CC">E</span><span class="svc-dot" style="background:#7B3D01">F</span></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip">
+  <div class="stn-name" id="tip-name"></div>
+  <div class="stn-kanji" id="tip-kanji"></div>
+  <div class="stn-code" id="tip-code"></div>
+  <div class="stn-km" id="tip-km"></div>
+  <div class="svc-row" id="tip-svcs"></div>
+</div>
+
+<script>
+const svcColors = {A:'#002A91',B:'#1B71CB',C:'#729FCF',D:'#926ACA',E:'#BC68CC',F:'#7B3D01'};
+const tip = document.getElementById('tooltip');
+function showTip(e, code, name, kanji, km, svcs) {
+  document.getElementById('tip-name').textContent = name;
+  document.getElementById('tip-kanji').textContent = kanji || '';
+  document.getElementById('tip-code').textContent = code;
+  document.getElementById('tip-km').textContent = km ? km + ' from SCL' : '';
+  const row = document.getElementById('tip-svcs');
+  row.innerHTML = '';
+  const seen = new Set();
+  svcs.forEach(s => {
+    if (!seen.has(s)) {
+      seen.add(s);
+      const chip = document.createElement('span');
+      chip.className = 'svc-chip';
+      chip.style.background = svcColors[s] || '#666';
+      chip.textContent = s;
+      row.appendChild(chip);
+    }
+  });
+  tip.style.display = 'block';
+  moveTip(e);
+}
+function moveTip(e) {
+  tip.style.left = Math.min(e.clientX + 14, window.innerWidth - 230) + 'px';
+  tip.style.top = Math.min(e.clientY - 10, window.innerHeight - 150) + 'px';
+}
+function hideTip() { tip.style.display = 'none'; }
+document.addEventListener('mousemove', e => { if(tip.style.display==='block') moveTip(e); });
+</script>
+</body>
+</html>
