@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>to.ryo 途旅 — Open Transit Portal</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=cabinet-grotesk@400,500,700,800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-body: 'Satoshi', 'Inter', sans-serif;
+      --font-display: 'Cabinet Grotesk', 'Satoshi', sans-serif;
+      --text-xs:   clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm:   clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg:   clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl:   clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --text-2xl:  clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+      --space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1rem;
+      --space-6:1.5rem;--space-8:2rem;--space-12:3rem;--space-16:4rem;
+      --radius-sm:.375rem;--radius-md:.5rem;--radius-lg:.75rem;--radius-xl:1rem;
+      --transition:180ms cubic-bezier(0.16,1,0.3,1);
+    }
+    [data-theme="dark"] {
+      --bg:#0d0f14;--surface:#13161f;--surface-2:#181c28;
+      --border:#252b3b;--text:#e2e8f0;--text-muted:#8892a4;--text-faint:#3d4557;
+      --accent:#4f8ef7;--accent-hover:#3b7ef5;--accent-glow:rgba(79,142,247,0.13);
+      --red:#ef4444;--teal:#14b8a6;--gold:#f59e0b;--purple:#a78bfa;
+    }
+    [data-theme="light"] {
+      --bg:#f6f8fc;--surface:#ffffff;--surface-2:#eef2f8;
+      --border:#dde3ef;--text:#1a2035;--text-muted:#5a6480;--text-faint:#bcc3d4;
+      --accent:#2563eb;--accent-hover:#1d4ed8;--accent-glow:rgba(37,99,235,0.09);
+      --red:#dc2626;--teal:#0d9488;--gold:#d97706;--purple:#7c3aed;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth;}
+    body{min-height:100dvh;font-family:var(--font-body);font-size:var(--text-base);color:var(--text);background:var(--bg);line-height:1.6;}
+
+    /* NAV */
+    nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:var(--space-4) var(--space-8);background:color-mix(in oklch,var(--bg) 85%,transparent);border-bottom:1px solid var(--border);backdrop-filter:blur(16px);}
+    .nav-logo{display:flex;align-items:center;gap:var(--space-3);text-decoration:none;color:var(--text);}
+    .toryo-wordmark{font-family:var(--font-display);font-size:1.25rem;font-weight:800;letter-spacing:-0.02em;}
+    .toryo-wordmark .dot{color:var(--accent);}
+    .toryo-wordmark .kanji{font-size:.8em;opacity:.55;margin-left:.25em;font-weight:500;letter-spacing:.02em;}
+    .nav-links{display:flex;gap:var(--space-6);align-items:center;}
+    .nav-links a{font-size:var(--text-sm);color:var(--text-muted);text-decoration:none;font-weight:500;transition:color var(--transition);}
+    .nav-links a:hover{color:var(--text);}
+    .nav-links a.active{color:var(--accent);}
+    .theme-btn{background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:var(--radius-md);padding:var(--space-2);cursor:pointer;display:flex;transition:color var(--transition),border-color var(--transition);}
+    .theme-btn:hover{color:var(--text);border-color:var(--text-muted);}
+
+    /* HERO */
+    .hero{padding:var(--space-16) var(--space-8);max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:var(--space-12);align-items:center;}
+    .hero-eyebrow{font-size:var(--text-xs);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:var(--space-4);}
+    .hero h1{font-family:var(--font-display);font-size:var(--text-2xl);font-weight:800;line-height:1.05;letter-spacing:-0.03em;margin-bottom:var(--space-6);}
+    .hero h1 .brand{color:var(--accent);}
+    .hero h1 .brand .dot{opacity:1;}
+    .hero-desc{font-size:var(--text-base);color:var(--text-muted);max-width:46ch;line-height:1.7;margin-bottom:var(--space-8);}
+    .hero-actions{display:flex;gap:var(--space-3);flex-wrap:wrap;}
+    .btn-primary{padding:var(--space-3) var(--space-6);background:var(--accent);color:white;border:none;border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:600;cursor:pointer;text-decoration:none;transition:background var(--transition),transform var(--transition),box-shadow var(--transition);}
+    .btn-primary:hover{background:var(--accent-hover);transform:translateY(-1px);box-shadow:0 6px 20px var(--accent-glow);}
+    .btn-secondary{padding:var(--space-3) var(--space-6);background:transparent;color:var(--text);border:1px solid var(--border);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:500;cursor:pointer;text-decoration:none;transition:border-color var(--transition),background var(--transition);}
+    .btn-secondary:hover{border-color:var(--text-muted);background:var(--surface);}
+
+    /* HERO PANEL */
+    .hero-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:var(--space-6);position:relative;overflow:hidden;}
+    .hero-panel::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 20%,var(--accent-glow),transparent 65%);pointer-events:none;}
+    .panel-label{font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:var(--space-4);}
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);margin-bottom:var(--space-5);}
+    .stat-box{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:var(--space-4);}
+    .stat-val{font-family:var(--font-display);font-size:var(--text-xl);font-weight:800;letter-spacing:-0.02em;line-height:1;}
+    .stat-val.c-red{color:var(--red);}.stat-val.c-blue{color:var(--accent);}.stat-val.c-teal{color:var(--teal);}.stat-val.c-gold{color:var(--gold);}
+    .stat-lbl{font-size:10px;color:var(--text-muted);margin-top:3px;text-transform:uppercase;letter-spacing:.05em;}
+
+    /* MINI LINE PREVIEW */
+    .mini-lines{border-top:1px solid var(--border);padding-top:var(--space-4);}
+    .ml-row{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-2);}
+    .ml-name{font-size:10px;font-weight:700;width:90px;flex-shrink:0;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;}
+    .ml-track{flex:1;height:3px;border-radius:2px;position:relative;}
+    .ml-dot{width:7px;height:7px;border-radius:50%;border:2px solid var(--surface);position:absolute;top:50%;transform:translateY(-50%);transition:transform var(--transition);cursor:pointer;}
+    .ml-dot:hover{transform:translateY(-50%) scale(1.7);}
+
+    /* FEATURES */
+    section{padding:var(--space-12) var(--space-8);max-width:1200px;margin:0 auto;}
+    .sec-eyebrow{font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:var(--space-2);}
+    .sec-title{font-family:var(--font-display);font-size:var(--text-xl);font-weight:800;letter-spacing:-0.02em;margin-bottom:var(--space-8);}
+    .features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:var(--space-4);}
+    .f-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:var(--space-6);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:var(--space-3);transition:border-color var(--transition),box-shadow var(--transition),transform var(--transition);}
+    .f-card:not(.wip):hover{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 8px 32px var(--accent-glow);transform:translateY(-2px);}
+    .f-card.wip{opacity:.55;cursor:default;}
+    .f-icon{font-size:1.75rem;}
+    .f-title{font-family:var(--font-display);font-size:var(--text-lg);font-weight:700;}
+    .f-desc{font-size:var(--text-sm);color:var(--text-muted);flex:1;}
+    .f-badge{font-size:var(--text-xs);font-weight:700;padding:2px 10px;border-radius:9999px;align-self:flex-start;margin-top:auto;}
+    .badge-live{background:color-mix(in oklch,var(--teal) 15%,transparent);color:var(--teal);}
+    .badge-wip{background:color-mix(in oklch,var(--gold) 15%,transparent);color:var(--gold);}
+
+    footer{border-top:1px solid var(--border);padding:var(--space-8);text-align:center;font-size:var(--text-sm);color:var(--text-muted);}
+    footer a{color:var(--accent);text-decoration:none;}
+    footer a:hover{text-decoration:underline;}
+    footer .brand-foot{font-weight:700;color:var(--text);}
+    @media(max-width:768px){.hero{grid-template-columns:1fr;gap:var(--space-8);padding:var(--space-8) var(--space-4);}nav{padding:var(--space-3) var(--space-4);}.nav-links{gap:var(--space-3);}section{padding:var(--space-8) var(--space-4);}}
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <!-- to.ryo inline SVG logo -->
+      <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-label="to.ryo">
+        <rect width="30" height="30" rx="7" fill="var(--accent)"/>
+        <!-- stylized 途 glyph abstraction: path + dot -->
+        <rect x="5" y="13" width="20" height="2.5" rx="1.25" fill="white"/>
+        <rect x="5" y="8" width="12" height="2.5" rx="1.25" fill="white" opacity=".65"/>
+        <rect x="5" y="18" width="15" height="2.5" rx="1.25" fill="white" opacity=".4"/>
+        <circle cx="23" cy="21" r="2.8" fill="white"/>
+        <circle cx="23" cy="21" r="1.4" fill="var(--accent)"/>
+      </svg>
+      <div>
+        <div class="toryo-wordmark">to<span class="dot">.</span>ryo<span class="kanji">途旅</span></div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="active">Home</a>
+      <a href="izx.html">IZX</a>
+      <a href="#">Metro</a>
+      <a href="#">Map</a>
+      <button class="theme-btn" data-theme-toggle aria-label="Toggle theme">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div>
+      <div class="hero-eyebrow">Open Transit · OSM · OGF</div>
+      <h1>Maps, diagrams<br>and routes for<br><span class="brand">to<span class="dot">.</span>ryo</span></h1>
+      <p class="hero-desc">途旅 — an open transit portal for interactive rail maps, line diagrams, timetables and route planning. Built on OSM &amp; Overpass data. Currently showcasing <strong>Izaland</strong>.</p>
+      <div class="hero-actions">
+        <a href="izx.html" class="btn-primary">🚄 IZX Diagram</a>
+        <a href="#features" class="btn-secondary">Explore features</a>
+      </div>
+    </div>
+    <div class="hero-panel">
+      <div class="panel-label">Izaland Network · at a glance</div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-val c-red">2,263</div><div class="stat-lbl">km IZX HSR</div></div>
+        <div class="stat-box"><div class="stat-val c-blue">16,418</div><div class="stat-lbl">km rail total</div></div>
+        <div class="stat-box"><div class="stat-val c-teal">606</div><div class="stat-lbl">km Metro (18 lines)</div></div>
+        <div class="stat-box"><div class="stat-val c-gold">52.3M</div><div class="stat-lbl">daily passengers</div></div>
+      </div>
+      <div class="mini-lines">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:var(--space-3)">IZX lines</div>
+        <div class="ml-row"><div class="ml-name">Saikai</div><div class="ml-track" style="background:var(--red);"><div class="ml-dot" style="background:var(--red);left:0"></div><div class="ml-dot" style="background:var(--red);left:20%"></div><div class="ml-dot" style="background:var(--red);left:53%"></div><div class="ml-dot" style="background:var(--red);left:83%"></div><div class="ml-dot" style="background:var(--red);right:0"></div></div></div>
+        <div class="ml-row"><div class="ml-name">Nagareki</div><div class="ml-track" style="background:var(--accent);"><div class="ml-dot" style="background:var(--accent);left:0"></div><div class="ml-dot" style="background:var(--accent);left:32%"></div><div class="ml-dot" style="background:var(--accent);left:60%"></div><div class="ml-dot" style="background:var(--accent);right:0"></div></div></div>
+        <div class="ml-row"><div class="ml-name">Ryānkai</div><div class="ml-track" style="background:var(--teal);"><div class="ml-dot" style="background:var(--teal);left:0"></div><div class="ml-dot" style="background:var(--teal);left:40%"></div><div class="ml-dot" style="background:var(--teal);left:67%"></div><div class="ml-dot" style="background:var(--teal);right:0"></div></div></div>
+        <div class="ml-row"><div class="ml-name">Nankai</div><div class="ml-track" style="background:var(--gold);"><div class="ml-dot" style="background:var(--gold);left:0"></div><div class="ml-dot" style="background:var(--gold);left:74%"></div><div class="ml-dot" style="background:var(--gold);right:0"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <section id="features">
+    <div class="sec-eyebrow">What's inside</div>
+    <h2 class="sec-title">Explore the network</h2>
+    <div class="features-grid">
+      <a href="izx.html" class="f-card">
+        <div class="f-icon">🚄</div>
+        <div class="f-title">IZX High-Speed Rail</div>
+        <div class="f-desc">Interactive schematic of all IZX lines — Saikai, Nagareki, Ryānkai, Nankai. Up to 360 km/h on dedicated HSR infrastructure.</div>
+        <div class="f-badge badge-live">✓ Live</div>
+      </a>
+      <div class="f-card wip">
+        <div class="f-icon">🚇</div>
+        <div class="f-title">Sainðaul Metro</div>
+        <div class="f-desc">All 18 lines of the Capital Subway Network — 606 km, integrated with Izarail suburban services.</div>
+        <div class="f-badge badge-wip">Coming soon</div>
+      </div>
+      <div class="f-card wip">
+        <div class="f-icon">🗺️</div>
+        <div class="f-title">Interactive Map</div>
+        <div class="f-desc">MapLibre GL JS on OGF tile server + live Overpass queries for stations, lines, and infrastructure layers.</div>
+        <div class="f-badge badge-wip">Coming soon</div>
+      </div>
+      <div class="f-card wip">
+        <div class="f-icon">🕐</div>
+        <div class="f-title">Timetables</div>
+        <div class="f-desc">Simulated IZX and intercity schedules. Sainðaul–Warohan in 2h 45m. GTFS-compatible data model.</div>
+        <div class="f-badge badge-wip">Coming soon</div>
+      </div>
+      <div class="f-card wip">
+        <div class="f-icon">🔍</div>
+        <div class="f-title">Route Planner</div>
+        <div class="f-desc">Journey planner across IZX, intercity and suburban networks. Powered by OpenTripPlanner + OSM graph.</div>
+        <div class="f-badge badge-wip">Coming soon</div>
+      </div>
+      <div class="f-card wip">
+        <div class="f-icon">🎫</div>
+        <div class="f-title">IZWay Card</div>
+        <div class="f-desc">The national smart transit card — accepted on all Izarail and private operators across the country.</div>
+        <div class="f-badge badge-wip">Coming soon</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p><span class="brand-foot">to.ryo 途旅</span> · Open Transit Portal · Built on <a href="https://openstreetmap.org" target="_blank" rel="noopener">OpenStreetMap</a> &amp; <a href="https://opengeofiction.net" target="_blank" rel="noopener">OpenGeoFiction</a> · MIT License</p>
+  </footer>
+
+  <script>
+    (function(){
+      const t=document.querySelector('[data-theme-toggle]'),r=document.documentElement;
+      let d=r.getAttribute('data-theme')||'dark';
+      t&&t.addEventListener('click',()=>{
+        d=d==='dark'?'light':'dark';
+        r.setAttribute('data-theme',d);
+        t.innerHTML=d==='dark'
+          ?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'
+          :'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
+      });
+    })();
+  </script>
+</body>
+</html>
